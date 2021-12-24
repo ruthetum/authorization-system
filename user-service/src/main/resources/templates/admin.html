@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>인증 시스템 | 관리자 페이지</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div id="container">
+    <div id="userInfo">
+        <div id="userCount">
+
+        </div>
+        <script>
+            $(document).ready(function() {
+                $.ajax({
+                    url: '/user-service/admin/api/users',
+                    contentType: 'application/json',
+                    type:'GET',
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader("Content-type","application/json");
+                        xhr.setRequestHeader("ACCESS-TOKEN", sessionStorage.getItem("AccessToken"));
+                    },
+                    error: function(){
+                        alert("접근 권한이 없습니다.");
+                        window.location.href = '/user-service/main';
+                    },
+                    success:function(data){
+                        document.getElementById("userCount").textContent = "총 ", data["count"] + "명"
+                        document.write("<table>\n" +
+                            "        <tr>\n" +
+                            "            <th>이메일</th>\n" +
+                            "            <th>이름</th>\n" +
+                            "            <th>가입일</th>\n" +
+                            "            <th>권한</th>\n" +
+                            "        </tr>");
+                        for (let i=0; i<data["users"].length; i++) {
+                            let text = "<tr><td>" + data["users"][i].email +"</td>";
+                            text += "<td>" + data["users"][i].name + "</td>";
+                            text += "<td>" + data["users"][i].createdAt + "</td>";
+                            text += "<td>" + data["users"][i].role + "</td></tr>";
+
+                        }
+                        document.write("</table>");
+                    }
+                });
+            })
+        </script>
+    </div>
+</div>
+</body>
+<script>
+    $(document).ready(function() {
+
+
+        function re() {
+            let body = {
+                accessToken: sessionStorage.getItem("AccessToken"),
+                refreshToken: sessionStorage.getItem("RefreshToken")
+            }
+            $.ajax({
+                url: '/user-service/users/token',
+                contentType: 'application/json',
+                type:'POST',
+                data: JSON.stringify(body),
+                error: function(){
+                    alert("토큰이 만료되었습니다.");
+                },
+                success:function(data){
+                    alert("토큰이 재발급되었습니다.");
+                    sessionStorage.setItem('AccessToken', data['accessToken']);
+                    sessionStorage.setItem('RefreshToken', data['RefreshToken']);
+                }
+            });
+        }
+    })
+</script>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>인증 시스템 | 사용자 정보</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div id="container">
+    <div id="user-info">
+        <table>
+            <tr>
+                <th>이메일</th>
+                <th>이름</th>
+                <th>가입일</th>
+            </tr>
+            <tr>
+                <td><div id="email"></div></td>
+                <td><div id="name"></div></td>
+                <td><div id="createdAt"></div></td>
+            </tr>
+        </table>
+    </div>
+</div>
+</body>
+<script>
+    $(document).ready(function() {
+        $.ajax({
+            url: '/user-service/api/users/my',
+            contentType: 'application/json',
+            type:'GET',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("Content-type","application/json");
+                xhr.setRequestHeader("ACCESS-TOKEN", sessionStorage.getItem("AccessToken"));
+            },
+            error: function(){
+                alert("입력한 정보의 사용자가 존재하지 않습니다.");
+                re();
+            },
+            success:function(data){
+                document.getElementById("email").textContent = data["email"];
+                document.getElementById("name").textContent = data["name"];
+                document.getElementById("createdAt").textContent = data["createdAt"];
+            }
+        });
+
+        function re() {
+            let body = {
+                accessToken: sessionStorage.getItem("AccessToken"),
+                refreshToken: sessionStorage.getItem("RefreshToken")
+            }
+            $.ajax({
+                url: '/user-service/users/token',
+                contentType: 'application/json',
+                type:'POST',
+                data: JSON.stringify(body),
+                error: function(){
+                    alert("토큰이 만료되었습니다.");
+                },
+                success:function(data){
+                    alert("토큰이 재발급되었습니다.");
+                    sessionStorage.setItem('AccessToken', data['accessToken']);
+                    sessionStorage.setItem('RefreshToken', data['RefreshToken']);
+                }
+            });
+        }
+    })
+</script>
+</html>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>인증 시스템 | 회원가입</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div id="container">
+    <form>
+        <input type="text" id="email" name="email" placeholder="이메일" maxlength="255" required/>
+        <button type="button" id="emailAuthBtn">이메일 인증코드 받기</button>
+        <br></br>
+        <input type="text" id="email-auth" name="email-auth" placeholder="인증번호" maxlength="6" style="display: none" required>
+        <br><br/>
+        <input type="password" id="password" name="password" placeholder="비밀번호 (8-20자)" maxlength="20" required>
+        <br><br/>
+        <input type="password" id="passwordCheck" name="passwordCheck" placeholder="비밀번호 확인" maxlength="20" required>
+        <br><br/>
+        <input type="text" id="name" name="name" placeholder="이름 (2-20자)" maxlength="20" required>
+        <br><br/>
+        <button type="button" id="signupBtn">회원가입</button>
+    </form>
+</div>
+</body>
+<script>
+    $(document).ready(function() {
+        // 이메일 인증 코드
+        $('#emailAuthBtn').click(function() {
+            document.getElementById('email-auth').style.display = "block";
+            let emailAuth = {
+                email: $('#email').val()
+            };
+            $.ajax({
+                url: '/user-service/verification',
+                contentType: 'application/json',
+                type:'POST',
+                data: JSON.stringify(emailAuth),
+                error: function(){
+                    alert("다른 이메일을 사용해주세요.");
+                },
+                success:function(data){
+                    alert("인증번호가 전송되었습니다.")
+                }
+            });
+        })
+
+        // 회원가입
+        $('#signupBtn').click(function() {
+            let body = {
+                email: $('#email').val(),
+                emailAuthCode: $('#email-auth').val(),
+                password: $('#password').val(),
+                passwordCheck: $('#passwordCheck').val(),
+                name: $('#name').val()
+            };
+            $.ajax({
+                url: '/user-service/signup',
+                contentType: 'application/json',
+                type:'POST',
+                data: JSON.stringify(body),
+                error: function(){
+                    alert("정보가 올바르게 입력되지 않았습니다.");
+                },
+                success:function(data){
+                    alert("성공적으로 회원가입이 되었습니다.")
+                    window.location.href = '/user-service';
+                }
+            });
+        })
+    })
+</script>
+</html>
